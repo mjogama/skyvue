@@ -1,10 +1,22 @@
 import { InlineCode } from "./InlineCode";
 import { SectionLabel } from "./SectionLabel";
+import { featureCard, featureTitle } from "@/styles/sidebarStyle";
+import { uvCategoryForScale, uvBarFillClass, uvAdviceLine } from "@/utils/uvSidebar";
+import type { IWindPayload } from "@/interfaces/sidebar/IWind";
 
-export function Sidebar() {
-  const featureCard =
-    "rounded-[14px] border border-slate-900/[0.08] bg-white p-[clamp(16px,2vw,22px)] shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_24px_rgba(15,23,42,0.06)] dark:border-white/[0.08] dark:bg-[#141824] dark:shadow-[0_4px_24px_rgba(0,0,0,0.35)]";
-  const featureTitle = "mb-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500";
+const UV_INDEX_MAX = 15;
+
+export function Sidebar({ data }: { data: IWindPayload }) {
+  const {
+    current: { wind_degree, wind_dir, wind_kph, gust_kph, gust_mph, uv },
+  } = data;
+
+  const uvForScale = Math.min(Math.max(uv, 0), UV_INDEX_MAX);
+  const uvBarPercent = (uvForScale / UV_INDEX_MAX) * 100;
+  const uvCategory = uvCategoryForScale(uv);
+  const uvAdviceParts = uvAdviceLine(uv).split(" — ");
+  const uvAdviceSummary = uvAdviceParts[0] ?? "";
+  const uvAdviceDetail = uvAdviceParts.slice(1).join(" — ");
 
   return (
     <aside
@@ -61,16 +73,24 @@ export function Sidebar() {
             UV index
           </div>
           <div id="uv-main" className="mb-1.5 text-[clamp(24px,3vw,32px)] font-semibold tracking-tight text-green-500">
-            <span id="uv-value">0.4</span>{" "}
+            <span id="uv-value">{uv}</span>{" "}
             <span id="uv-category" className="text-sm font-normal text-slate-600 dark:text-slate-400">
-              Low
+              {uvCategory}
             </span>
           </div>
-          <div id="uv-bar" className="mt-2.5 h-1.5 overflow-hidden rounded-sm bg-[#eef1f6] dark:bg-[#1e2433]">
-            <div id="uv-bar-fill" className="h-full w-[4%] rounded-sm bg-green-500" />
+          <div
+            id="uv-bar"
+            className="mt-2.5 h-1.5 overflow-hidden rounded-sm bg-[#eef1f6] dark:bg-[#1e2433]"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={UV_INDEX_MAX}
+            aria-valuenow={uvForScale}
+            aria-label={`UV index ${uv} on a 0–${UV_INDEX_MAX} scale`}>
+            <div id="uv-bar-fill" className={`h-full rounded-sm transition-[width] duration-300 ease-out ${uvBarFillClass(uv)}`} style={{ width: `${uvBarPercent}%` }} />
           </div>
           <div id="uv-advice" className="mt-2 text-[13px] leading-snug text-slate-600 dark:text-slate-400">
-            Minimal UV · <InlineCode>current.uv</InlineCode> — still use protection if you burn easily
+            {uvAdviceSummary} · <InlineCode>{uv}</InlineCode>
+            {uvAdviceDetail ? ` — ${uvAdviceDetail}` : ""}
           </div>
         </div>
       </div>
@@ -82,16 +102,16 @@ export function Sidebar() {
           </div>
           <div id="wind-detail-body" className="flex items-center gap-[18px]">
             <div id="wind-compass" className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border border-slate-900/8 bg-[#eef1f6] dark:border-white/8 dark:bg-[#1e2433]">
-              <span id="wind-compass-arrow" className="inline-block origin-center text-[26px] text-blue-600 dark:text-blue-400" style={{ transform: "rotate(102deg)" }} aria-hidden="true">
+              <span id="wind-compass-arrow" className="inline-block origin-center text-[26px] text-blue-600 dark:text-blue-400" style={{ transform: `rotate(${wind_degree}deg)` }} aria-hidden="true">
                 ↑
               </span>
             </div>
             <div id="wind-detail-text">
               <div id="wind-speed-display" className="text-[clamp(24px,3vw,32px)] font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                12 km/h
+                {wind_kph} km/h
               </div>
               <div id="wind-direction-detail" className="text-[13px] leading-snug text-slate-600 dark:text-slate-400">
-                From ESE · 102° · Gusts 19 km/h · 7.6 mph / 11.8 mph gust
+                From {wind_dir} · {wind_degree}° · Gusts {gust_kph} km/h · {gust_mph} mph gust
               </div>
             </div>
           </div>
@@ -104,7 +124,7 @@ export function Sidebar() {
             <path d="M 20 65 Q 100 10 180 65" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-900/10 dark:text-white/10" />
             <path d="M 20 65 Q 100 10 140 45" fill="none" stroke="#f97316" strokeWidth="2.5" />
             <circle cx="140" cy="45" r="7" fill="#fbbf24" />
-            <text x="16" y="72" fontSize="10" fill="currentColor" className="text-slate-400 dark:text-slate-500" id="sunrise-label">
+            <text x="24" y="72" fontSize="10" fill="currentColor" className="text-slate-400 dark:text-slate-500" id="sunrise-label">
               —
             </text>
             <text x="158" y="72" fontSize="10" fill="currentColor" className="text-slate-400 dark:text-slate-500" id="sunset-label">

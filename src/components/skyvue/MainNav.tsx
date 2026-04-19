@@ -1,16 +1,22 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import { cn } from "./cn";
 
+export type TemperatureUnit = "celsius" | "fahrenheit";
+
 export function MainNav({
   locationQuery,
   onSearchSubmit,
   darkMode,
   onDarkModeChange,
+  temperatureUnit,
+  onTemperatureUnitChange,
 }: {
   locationQuery: string;
   onSearchSubmit: (query: string) => void;
   darkMode: boolean;
   onDarkModeChange: (next: boolean) => void;
+  temperatureUnit: TemperatureUnit;
+  onTemperatureUnitChange: (unit: TemperatureUnit) => void;
 }) {
   const [draft, setDraft] = useState(locationQuery);
 
@@ -22,6 +28,10 @@ export function MainNav({
     e.preventDefault();
     onSearchSubmit(draft.trim());
   };
+
+  useEffect(() => {
+    console.log(temperatureUnit);
+  }, [temperatureUnit]);
 
   return (
     <nav id="nav-main" className="sticky top-0 z-50 border-b border-slate-900/8 bg-white/85 backdrop-blur-md transition-colors dark:border-white/8 dark:bg-[#141824]/88">
@@ -57,20 +67,28 @@ export function MainNav({
 
         <div className="nav-right ml-auto flex shrink-0 items-center gap-3 sm:ml-auto" id="nav-actions">
           <div id="unit-toggle" role="group" aria-label="Temperature unit" className="flex overflow-hidden rounded-full border border-slate-900/8 bg-[#eef1f6] dark:border-white/8 dark:bg-[#1e2433]">
-            <input type="radio" name="unit" id="unit-celsius" className="peer/c peer sr-only" value="celsius" defaultChecked />
-            <label
-              htmlFor="unit-celsius"
-              id="unit-celsius-label"
-              className="flex cursor-pointer items-center justify-center px-3.5 py-1.5 text-[13px] font-medium text-slate-400 peer-checked/c:bg-blue-600 peer-checked/c:text-white dark:peer-checked/c:bg-blue-500">
+            <button
+              type="button"
+              id="unit-celsius"
+              aria-pressed={temperatureUnit === "celsius"}
+              onClick={() => onTemperatureUnitChange("celsius")}
+              className={cn(
+                "flex min-w-[44px] cursor-pointer items-center justify-center px-3.5 py-1.5 text-[13px] font-medium transition-colors",
+                temperatureUnit === "celsius" ? "bg-blue-600 text-white dark:bg-blue-500" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300",
+              )}>
               °C
-            </label>
-            <input type="radio" name="unit" id="unit-fahrenheit" className="peer/f peer sr-only" value="fahrenheit" />
-            <label
-              htmlFor="unit-fahrenheit"
-              id="unit-fahrenheit-label"
-              className="flex cursor-pointer items-center justify-center px-3.5 py-1.5 text-[13px] font-medium text-slate-400 peer-checked/f:bg-blue-600 peer-checked/f:text-white dark:peer-checked/f:bg-blue-500">
+            </button>
+            <button
+              type="button"
+              id="unit-fahrenheit"
+              aria-pressed={temperatureUnit === "fahrenheit"}
+              onClick={() => onTemperatureUnitChange("fahrenheit")}
+              className={cn(
+                "flex min-w-[44px] cursor-pointer items-center justify-center px-3.5 py-1.5 text-[13px] font-medium transition-colors",
+                temperatureUnit === "fahrenheit" ? "bg-blue-600 text-white dark:bg-blue-500" : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300",
+              )}>
               °F
-            </label>
+            </button>
           </div>
 
           <label
