@@ -1,9 +1,31 @@
-export function StatsSection() {
-  const card =
-    "rounded-[14px] border border-slate-900/[0.08] bg-white p-[clamp(14px,2vw,20px)] shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_24px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(15,23,42,0.08)] dark:border-white/[0.08] dark:bg-[#141824] dark:shadow-[0_4px_24px_rgba(0,0,0,0.35)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)]";
-  const label = "mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500";
-  const val = "text-[clamp(20px,2.5vw,26px)] font-semibold tracking-tight text-slate-900 dark:text-slate-100";
-  const sub = "mt-1 text-xs text-slate-400 dark:text-slate-500";
+import type { IStats } from "@/interfaces/IStats";
+import { card, label, sub, val } from "@/styles/statsStyle";
+
+export function StatsSection({ data }: { data: IStats }) {
+  const { humidity, wind_kph, wind_dir, vis_km, vis_miles, pressure_mb, pressure_in } = data.current;
+
+  const visibilityCondition = (visibilityKm: number) => {
+    const labelClass = "font-medium";
+    if (visibilityKm > 10) {
+      return <span className={`${labelClass} text-emerald-600 dark:text-emerald-400`}>Excellent</span>;
+    }
+    if (visibilityKm >= 6) {
+      return <span className={`${labelClass} text-teal-600 dark:text-teal-400`}>Good</span>;
+    }
+    if (visibilityKm >= 2) {
+      return <span className={`${labelClass} text-amber-600 dark:text-amber-400`}>Moderate</span>;
+    }
+    if (visibilityKm >= 1) {
+      return <span className={`${labelClass} text-orange-600 dark:text-orange-400`}>Poor</span>;
+    }
+    if (visibilityKm >= 0.2) {
+      return <span className={`${labelClass} text-orange-700 dark:text-orange-500`}>Poor</span>;
+    }
+    if (visibilityKm > 0) {
+      return <span className={`${labelClass} text-red-600 dark:text-red-400`}>Extremely Poor</span>;
+    }
+    return <span className={`${labelClass} text-slate-500 dark:text-slate-400`}>—</span>;
+  };
 
   return (
     <div id="stats-row" className="mb-4 grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2 lg:grid-cols-4 lg:gap-4">
@@ -12,10 +34,10 @@ export function StatsSection() {
           Humidity
         </div>
         <div id="stat-humidity-value" className={val}>
-          81%
+          {humidity}%
         </div>
         <div id="stat-humidity-bar" className="mt-2.5 h-1.5 overflow-hidden rounded-sm bg-[#eef1f6] dark:bg-[#1e2433]">
-          <div id="stat-humidity-bar-fill" className="h-full w-[81%] rounded-sm bg-linear-to-r from-blue-600 to-sky-400" />
+          <div id="stat-humidity-bar-fill" className="h-full rounded-sm bg-linear-to-r from-blue-600 to-sky-400 transition-all duration-500 ease-in-out" style={{ width: `${humidity}%` }} />
         </div>
       </div>
       <div id="stat-card-wind" className={card}>
@@ -23,10 +45,10 @@ export function StatsSection() {
           Wind
         </div>
         <div id="stat-wind-value" className={val}>
-          12
+          {wind_kph}
         </div>
         <div id="stat-wind-detail" className={sub}>
-          km/h ESE
+          km/h {wind_dir}
         </div>
       </div>
       <div id="stat-card-visibility" className={card}>
@@ -34,10 +56,10 @@ export function StatsSection() {
           Visibility
         </div>
         <div id="stat-visibility-value" className={val}>
-          10
+          {vis_miles}
         </div>
         <div id="stat-visibility-detail" className={sub}>
-          km (6 mi) — Good
+          km ({vis_km}) — {visibilityCondition(vis_km)}
         </div>
       </div>
       <div id="stat-card-pressure" className={card}>
@@ -45,10 +67,10 @@ export function StatsSection() {
           Pressure
         </div>
         <div id="stat-pressure-value" className={val}>
-          1023
+          {pressure_mb}
         </div>
         <div id="stat-pressure-detail" className={sub}>
-          mb (30.21 in)
+          mb ({pressure_in} in)
         </div>
       </div>
     </div>
